@@ -1,0 +1,73 @@
+QUERY:
+    WITH Salaries AS (
+        SELECT
+            AVG(CAST("Annual Salary" AS REAL)) AS "Média Salarial Anual dos Demais Trabalhadores",
+            AVG(CAST("Hourly Rate" AS REAL) * CAST("Typical Hours" AS REAL) * 52) AS "Média Salarial Anual dos Trabalhadores por Hora"
+        FROM "chicago"
+        WHERE "Salary or Hourly" = 'Salary'
+    )
+
+    SELECT
+        *,
+        CASE
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" > "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Demais Trabalhadores'
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" < "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Trabalhadores por Hora'
+            ELSE 'Iguais'
+        END AS "Maior Média Salarial"
+    FROM Salaries;
+
+    -- Calcular a diferença entre as médias
+    WITH Salaries AS (
+        SELECT
+            AVG(CAST("Annual Salary" AS REAL)) AS "Média Salarial Anual dos Demais Trabalhadores",
+            AVG(CAST("Hourly Rate" AS REAL) * CAST("Typical Hours" AS REAL) * 52) AS "Média Salarial Anual dos Trabalhadores por Hora"
+        FROM "chicago"
+        WHERE "Salary or Hourly" = 'Salary'
+    )
+
+    SELECT
+        *,
+        CASE
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" > "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Demais Trabalhadores'
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" < "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Trabalhadores por Hora'
+            ELSE 'Iguais'
+        END AS "Maior Média Salarial",
+        CASE
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" > "Média Salarial Anual dos Trabalhadores por Hora" THEN
+                "Média Salarial Anual dos Demais Trabalhadores" - "Média Salarial Anual dos Trabalhadores por Hora"
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" < "Média Salarial Anual dos Trabalhadores por Hora" THEN
+                "Média Salarial Anual dos Trabalhadores por Hora" - "Média Salarial Anual dos Demais Trabalhadores"
+            ELSE 0
+        END AS "Diferença Salarial"
+    FROM Salaries;
+
+    -- Incrementar os salários da população com a menor média até que a diferença seja reduzida ou eliminada
+    UPDATE "chicago"
+    SET "Annual Salary" = 
+        CASE
+            WHEN "Salary or Hourly" = 'Salary' THEN
+                CAST("Annual Salary" AS REAL) + "Diferença Salarial"
+            ELSE
+                CAST("Hourly Rate" AS REAL) * CAST("Typical Hours" AS REAL) * 52 + "Diferença Salarial"
+        END
+    WHERE
+        (SELECT "Maior Média Salarial" FROM Salaries) = 'Demais Trabalhadores'
+        AND "Salary or Hourly" = 'Salary';
+        
+    -- Verificar novamente as médias
+    WITH Salaries AS (
+        SELECT
+            AVG(CAST("Annual Salary" AS REAL)) AS "Média Salarial Anual dos Demais Trabalhadores",
+            AVG(CAST("Hourly Rate" AS REAL) * CAST("Typical Hours" AS REAL) * 52) AS "Média Salarial Anual dos Trabalhadores por Hora"
+        FROM "chicago"
+        WHERE "Salary or Hourly" = 'Salary'
+    )
+
+    SELECT
+        *,
+        CASE
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" > "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Demais Trabalhadores'
+            WHEN "Média Salarial Anual dos Demais Trabalhadores" < "Média Salarial Anual dos Trabalhadores por Hora" THEN 'Trabalhadores por Hora'
+            ELSE 'Iguais'
+        END AS "Maior Média Salarial"
+    FROM Salaries;
